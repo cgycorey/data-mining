@@ -34,6 +34,7 @@ std_x = scale(x)
 # and the test data together is not the right thing
 # to do. For now it's not a huge deal, but we'll
 # consider this later on. What might be the problem?
+# we need to use the training data's std and mean to standarise the testing data
 std_train_x = std_x[-test_indices,]
 std_test_x = std_x[test_indices,]
 
@@ -51,7 +52,18 @@ misclassification_rate == (false_pos + false_neg) / sum(confusion_matrix)
 precision = true_pos / (true_pos + false_pos)
 recall = true_pos / (true_pos + false_neg)
 
+#train vs train don't do this in practice!! duplicate roles makes our classifier confused
+set.seed(7)
+testindx = sample(1:nrow(std_train_x),
+                      size = 100,
+                      replace = FALSE);
 
+selfTestX = std_train_x[testindx,]
+selfTestY= train_y[testindx]
+nrow(selfTestX) == 100
+knntrain = knn(std_train_x,std_train_x, train_y, k = 1)
+
+confusion_matrixtt = table(knntrain, train_y)
 
 all_no = rep("No",length(test_y))
 no_confusion_matrix = table(all_no, test_y,dnn = c("No","Yes"))
